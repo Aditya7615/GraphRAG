@@ -1,0 +1,25 @@
+# Generated files (can be regenerated from raw data + notebooks)
+03_eda_cleaned/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Scraped data (if regenerated)
+01_raw_data_and_scrapers/*.csv
