@@ -1,0 +1,180 @@
+{
+  "best_model_name": "LightGBM",
+  "features": [
+    "matches",
+    "runs",
+    "batting_average",
+    "strike_rate",
+    "fours",
+    "sixes",
+    "fifties",
+    "hundreds",
+    "catches",
+    "wickets",
+    "bowling_average",
+    "economy_rate",
+    "bowling_strike_rate",
+    "career_matches",
+    "career_fifties",
+    "career_hundreds",
+    "career_catches",
+    "seasons_played"
+  ],
+  "train_samples": 2260,
+  "test_samples": 565,
+  "n_features": 18,
+  "comparison": [
+    {
+      "Model": "XGBoost",
+      "R\u00b2": 0.9853,
+      "MAE": 0.1932,
+      "RMSE": 0.2556,
+      "Time (s)": 5.3
+    },
+    {
+      "Model": "LightGBM",
+      "R\u00b2": 0.9859,
+      "MAE": 0.1896,
+      "RMSE": 0.2506,
+      "Time (s)": 66.8
+    },
+    {
+      "Model": "Ensemble",
+      "R\u00b2": 0.9854,
+      "MAE": 0.1859,
+      "RMSE": 0.2554,
+      "Time (s)": 16.1
+    }
+  ],
+  "role_lgb": {
+    "batsman": {
+      "r2_score": 0.9493878822332636,
+      "mae": 0.29540414987983143,
+      "rmse": 0.42907702003453124,
+      "features": [
+        "runs",
+        "matches",
+        "batting_average",
+        "strike_rate",
+        "fours",
+        "sixes",
+        "fifties",
+        "hundreds",
+        "catches",
+        "career_matches",
+        "seasons_played",
+        "career_fifties",
+        "career_hundreds",
+        "career_catches"
+      ]
+    },
+    "bowler": {
+      "r2_score": 0.6322886058782202,
+      "mae": 0.7074612124919478,
+      "rmse": 0.8654509887772215,
+      "features": [
+        "wickets",
+        "matches",
+        "bowling_average",
+        "economy_rate",
+        "bowling_strike_rate",
+        "catches",
+        "career_matches",
+        "seasons_played",
+        "career_catches"
+      ]
+    },
+    "all_rounder": {
+      "r2_score": 0.9751264094149436,
+      "mae": 0.2751587766342249,
+      "rmse": 0.35662744195622836,
+      "features": [
+        "runs",
+        "wickets",
+        "matches",
+        "batting_average",
+        "strike_rate",
+        "fours",
+        "sixes",
+        "fifties",
+        "hundreds",
+        "catches",
+        "bowling_average",
+        "economy_rate",
+        "bowling_strike_rate",
+        "career_matches",
+        "seasons_played",
+        "career_fifties",
+        "career_hundreds",
+        "career_catches"
+      ]
+    }
+  },
+  "role_ensemble": {
+    "batsman": {
+      "r2_score": 0.9510661960908368,
+      "mae": 0.28143926616158005,
+      "rmse": 0.42190287949566624,
+      "weight": 0.74,
+      "features": [
+        "runs",
+        "matches",
+        "batting_average",
+        "strike_rate",
+        "fours",
+        "sixes",
+        "fifties",
+        "hundreds",
+        "catches",
+        "career_matches",
+        "seasons_played",
+        "career_fifties",
+        "career_hundreds",
+        "career_catches"
+      ]
+    },
+    "bowler": {
+      "r2_score": 0.6555361875266864,
+      "mae": 0.6673299714258878,
+      "rmse": 0.83764642006204,
+      "weight": 0.52,
+      "features": [
+        "wickets",
+        "matches",
+        "bowling_average",
+        "economy_rate",
+        "bowling_strike_rate",
+        "catches",
+        "career_matches",
+        "seasons_played",
+        "career_catches"
+      ]
+    },
+    "all_rounder": {
+      "r2_score": 0.9751264094149436,
+      "mae": 0.2751587766342249,
+      "rmse": 0.35662744195622836,
+      "weight": 0.0,
+      "features": [
+        "runs",
+        "wickets",
+        "matches",
+        "batting_average",
+        "strike_rate",
+        "fours",
+        "sixes",
+        "fifties",
+        "hundreds",
+        "catches",
+        "bowling_average",
+        "economy_rate",
+        "bowling_strike_rate",
+        "career_matches",
+        "seasons_played",
+        "career_fifties",
+        "career_hundreds",
+        "career_catches"
+      ]
+    }
+  }
+}

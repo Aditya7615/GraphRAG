@@ -1,0 +1,19 @@
+{
+  "model": "LightGBM",
+  "features": [
+    "wickets",
+    "matches",
+    "bowling_average",
+    "economy_rate",
+    "bowling_strike_rate",
+    "catches",
+    "career_matches",
+    "seasons_played",
+    "career_catches"
+  ],
+  "r2_score": 0.6322886058782202,
+  "mae": 0.7074612124919478,
+  "rmse": 0.8654509887772215,
+  "train_samples": 761,
+  "test_samples": 191
+}

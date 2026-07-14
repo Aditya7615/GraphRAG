@@ -1,0 +1,24 @@
+{
+  "model": "LightGBM",
+  "features": [
+    "runs",
+    "matches",
+    "batting_average",
+    "strike_rate",
+    "fours",
+    "sixes",
+    "fifties",
+    "hundreds",
+    "catches",
+    "career_matches",
+    "seasons_played",
+    "career_fifties",
+    "career_hundreds",
+    "career_catches"
+  ],
+  "r2_score": 0.9493878822332636,
+  "mae": 0.29540414987983143,
+  "rmse": 0.42907702003453124,
+  "train_samples": 1197,
+  "test_samples": 300
+}
