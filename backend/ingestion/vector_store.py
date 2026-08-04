@@ -150,6 +150,8 @@ class HybridVectorStore:
             self.client.upsert(collection_name=self.collection, points=points, wait=True)
             written += len(points)
             logger.debug("Upserted %s/%s child chunks", written, len(children))
+            import time
+            time.sleep(0.05)  # small delay to avoid overwhelming Qdrant with rapid writes
         return written
 
     def delete_document(self, doc_id: str) -> None:
