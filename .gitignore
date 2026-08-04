@@ -1,30 +1,56 @@
-# Dependencies
-node_modules/
-portfolio-app/node_modules/
-
-# Build outputs
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
 dist/
-portfolio-app/dist/
+build/
+*.egg
 
-# Angular
-.angular/
-.vercel/
+# Virtual environment
+.venv/
+venv/
+ENV/
 
 # Environment
 .env
 .env.local
 
-# OS
-.DS_Store
-Thumbs.db
-
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
 npm-debug.log*
 
-# OS
-.DS_Store
+# Testing / Linting
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Data (generated at runtime — do not commit)
+data/synthetic/
+data/uploads/
+data/docstore/parents.json
+data/docstore/bm25_stats.json
+data/large/
+
+# Qdrant / Postgres volumes (managed by Docker)
+qdrant_storage/
+postgres_data/
+
+# Jupyter
+.ipynb_checkpoints/
+1st.ipynb
+
+# Reports
+*.pptx

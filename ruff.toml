@@ -1,0 +1,11 @@
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "ISC", "BLE", "RUF"]
+ignore = [
+    "ISC004",  # implicit string concat in large data literals and prompts
+    "E501",    # line too long — enforced by formatter, not linter
+]
+
+[lint.per-file-ignores]
+"backend/main.py" = ["B008"]   # FastAPI Depends()/File()/Query() in signatures — standard pattern
+"tests/*" = ["B008"]
+"scripts/*" = ["RUF005"]  # list concat preference — readability choice
