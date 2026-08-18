@@ -214,17 +214,6 @@ All sources merge automatically into the same vector store.
 
 6. **Hallucination Grading** — A second Pydantic-structured LLM call verifies the answer is grounded in the provided context. If hallucinated, the generation is retried.
 
-## Resume-Ready Highlights
-
-| Feature | What It Demonstrates |
-|---------|---------------------|
-| **Hybrid Retrieval (BM25 + RRF)** | Search/recommendation systems, e-commerce relevance |
-| **Pydantic Structured Outputs** | Production reliability, type-safe grading pipelines |
-| **Self-Corrective Loops** | Fault-tolerant agentic systems, error recovery |
-| **Web Search Fallback** | Graceful degradation, external tool integration |
-| **Streamlit UI** | User-facing product, interactive data application |
-| **LangGraph State Machine** | Complex workflow orchestration, cyclical graphs |
-
 ## RAGAS Evaluation
 
 The GraphRAG pipeline includes built-in evaluation using [RAGAS](https://docs.ragas.io/) (Retrieval Augmented Generation Assessment) metrics.
