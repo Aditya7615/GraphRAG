@@ -39,6 +39,9 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
+# Generated
+api_server.py
+
 # User uploads and generated data
 data/pdfs/*
 data/texts/*

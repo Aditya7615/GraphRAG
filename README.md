@@ -2,7 +2,25 @@
 
 **Enterprise-Grade Self-Corrective Agentic RAG Engine**
 
-A production-ready Retrieval-Augmented Generation framework built with LangGraph, LangChain, and Groq — featuring hybrid retrieval, Pydantic-structured grading, self-corrective loops, and web search fallback.
+A production-ready Retrieval-Augmented Generation framework built with LangGraph, LangChain, and Groq — featuring hybrid retrieval, Pydantic-structured grading, self-corrective loops, and a polished Streamlit UI.
+
+## Demo
+
+```
+Upload Documents → Ask Questions → Get Grounded Answers
+```
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **Streamlit UI** | Polished web interface with document upload, chat, and real-time pipeline status |
+| **Hybrid Retrieval** | BM25 (sparse/keyword) + ChromaDB (dense/semantic) with Reciprocal Rank Fusion |
+| **Pydantic Structured Outputs** | Type-safe document grading and hallucination verification via `with_structured_output()` |
+| **Self-Corrective Loops** | Automated retry on hallucination detection using LangGraph conditional edges |
+| **Web Search Fallback** | Tavily integration triggers when local retrieval finds no relevant documents |
+| **Local Embeddings** | HuggingFace BGE-small model — no API key needed for embeddings |
+| **Document Ingestion** | PDF, TXT, and Markdown support with drag-and-drop upload |
 
 ## Architecture
 
@@ -23,13 +41,11 @@ User Query
     │ relevant?│
     └────┬────┘
     yes  │  no
-    │    └──────► ┌──────────────┐
-    │             │  WEB SEARCH   │  Tavily fallback
-    │             └──────┬───────┘
+    │    └──────► (web search fallback if configured)
     │                    │
     ▼                    ▼
 ┌─────────────────┐
-│  GENERATE        │  Groq Llama-3.3-70B response
+│  GENERATE        │  Groq Qwen3.6-27B response
 └────────┬────────┘
          │
          ▼
@@ -46,28 +62,18 @@ User Query
   END → Response
 ```
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| **Hybrid Retrieval** | BM25 (sparse/keyword) + ChromaDB (dense/semantic) with Reciprocal Rank Fusion |
-| **Pydantic Structured Outputs** | Type-safe document grading and hallucination verification via `with_structured_output()` |
-| **Self-Corrective Loops** | Automated retry on hallucination detection using LangGraph conditional edges |
-| **Web Search Fallback** | Tavily integration triggers when local retrieval finds no relevant documents |
-| **Local Embeddings** | HuggingFace BGE-small model — no API key needed for embeddings |
-| **Streaming API** | FastAPI + Server-Sent Events for real-time node state streaming |
-| **Document Ingestion** | PDF, TXT, Markdown, and manual document loading |
-
 ## Tech Stack
 
-- **LLM**: [Groq](https://groq.com/) — Qwen3.6-27B (free tier, fast inference)
-- **Embeddings**: [HuggingFace BGE-small](https://huggingface.co/BAAI/bge-small-en-v1.5) (local, no API key)
-- **Orchestration**: [LangGraph](https://github.com/langchain-ai/langgraph) — cyclical state graphs
-- **Vector Store**: [ChromaDB](https://www.trychroma.com/) — in-memory semantic search
-- **Keyword Search**: [BM25](https://github.com/dorianbrown/rank_bm25) — sparse lexical retrieval
-- **Structured Outputs**: [Pydantic](https://docs.pydantic.dev/) — type-safe LLM grading
-- **Web Search**: [Tavily](https://tavily.com/) — fallback when local retrieval fails
-- **API**: [FastAPI](https://fastapi.tiangolo.com/) + SSE streaming
+| Category | Library |
+|----------|---------|
+| **LLM** | [Groq](https://groq.com/) — Qwen3.6-27B (free tier, fast inference) |
+| **Embeddings** | [HuggingFace BGE-small](https://huggingface.co/BAAI/bge-small-en-v1.5) (local, no API key) |
+| **Orchestration** | [LangGraph](https://github.com/langchain-ai/langgraph) — cyclical state graphs |
+| **Vector Store** | [ChromaDB](https://www.trychroma.com/) — in-memory semantic search |
+| **Keyword Search** | [BM25](https://github.com/dorianbrown/rank_bm25) — sparse lexical retrieval |
+| **Structured Outputs** | [Pydantic](https://docs.pydantic.dev/) — type-safe LLM grading |
+| **Web Search** | [Tavily](https://tavily.com/) — fallback when local retrieval fails |
+| **UI** | [Streamlit](https://streamlit.io/) — interactive web interface |
 
 ## Quick Start
 
@@ -92,57 +98,76 @@ Required:
 Optional:
 - `TAVILY_API_KEY` — Get at [tavily.com](https://tavily.com) (for web search fallback)
 
-### 3. Run the Notebook
+### 3. Run the Streamlit App
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Opens at **http://localhost:8501** with:
+- Drag-and-drop document upload (PDF, TXT, MD)
+- Chat interface with real-time pipeline status
+- Source attribution with expandable document snippets
+
+### 4. (Alternative) Run the Notebook
 
 ```bash
 jupyter notebook GraphRAG.ipynb
 ```
 
-Run cells top-to-bottom. The notebook will:
-1. Install dependencies
-2. Load documents (PDFs from `data/pdfs/`, texts from `data/texts/`, or manual input)
-3. Build hybrid vector store (BM25 + Chroma)
-4. Compile the LangGraph workflow
-5. Run test queries
-
-### 4. (Optional) Launch API Server
-
-```bash
-python api_server.py
-# Server runs at http://localhost:8000
-# Health check: GET /health
-# Query: POST /query {"question": "your question"}
-```
+Run cells top-to-bottom for the full pipeline with test queries.
 
 ## Project Structure
 
 ```
 GraphRAG/
-├── GraphRAG.ipynb          # Main notebook — full pipeline
-├── api_server.py             # FastAPI streaming server (generated by notebook)
-├── requirements.txt          # Python dependencies
-├── .env.example              # Environment variable template
-├── .env                      # Your API keys (git-ignored)
+├── streamlit_app.py         # Streamlit UI — main entry point
+├── GraphRAG.ipynb           # Jupyter notebook — full pipeline
+├── requirements.txt         # Python dependencies
+├── .env.example             # Environment variable template
+├── .env                     # Your API keys (git-ignored)
 ├── data/
-│   ├── pdfs/                 # Drop PDF files here
-│   └── texts/                # Drop .txt/.md files here
+│   ├── pdfs/                # Drop PDF files here (git-ignored)
+│   ├── texts/               # Drop .txt/.md files here (git-ignored)
+│   └── chroma_db/           # Persisted vector store (git-ignored)
 └── README.md
 ```
 
-## Adding Your Own Documents
+## UI Features
 
-### PDFs
-```bash
-cp your_document.pdf data/pdfs/
-```
+### Welcome Screen
+When no documents are loaded, the app shows a welcome card with:
+- 3-step guide (Upload → Save → Ask)
+- Example question prompts
 
-### Text / Markdown
+### Sidebar
+- **File Upload**: Drag-and-drop PDF, TXT, or MD files
+- **Save**: Persists uploaded files to `data/pdfs/` or `data/texts/`
+- **Clear All**: Removes all saved documents
+- **Document Stats**: PDF/text counts with expandable file lists
+- **Pipeline Info**: Retrieval weights, chunk size, LLM model details
+
+### Chat Interface
+- User/assistant avatars on messages
+- Live pipeline status bar (Retrieving → Graded → Generated → Verified)
+- Response timing display
+- Expandable source snippets for each answer
+- Full conversation history
+
+## Adding Documents
+
+### Via Streamlit UI (Recommended)
+1. Open the app at http://localhost:8501
+2. Drag files into the sidebar upload area
+3. Click **Save**
+
+### Via File System
 ```bash
+cp document.pdf data/pdfs/
 cp notes.txt data/texts/
-cp readme.md data/texts/
 ```
 
-### Manual
+### Via Notebook
 Edit the `manual_docs` list in Cell 3c of the notebook.
 
 All sources merge automatically into the same vector store.
@@ -162,15 +187,17 @@ All sources merge automatically into the same vector store.
 
 ## How It Works
 
-1. **Hybrid Retrieval** — Combines BM25 keyword search (40%) with ChromaDB semantic search (60%) using Reciprocal Rank Fusion for superior ranked results.
+1. **Document Ingestion** — PDFs, text files, and markdown are loaded and split into 500-character chunks with 50-character overlap.
 
-2. **Document Grading** — Each retrieved document is graded for relevance using a Pydantic-structured Groq LLM call. Irrelevant docs are filtered out.
+2. **Hybrid Retrieval** — Combines BM25 keyword search (40%) with ChromaDB semantic search (60%) using Reciprocal Rank Fusion for superior ranked results.
 
-3. **Web Search Fallback** — If no documents pass the relevance filter, Tavily web search is triggered to supplement the context.
+3. **Document Grading** — Each retrieved document is graded for relevance using a Pydantic-structured Groq LLM call. Irrelevant docs are filtered out.
 
-4. **Generation** — The LLM generates a response grounded in the filtered context.
+4. **Web Search Fallback** — If no documents pass the relevance filter, Tavily web search is triggered to supplement the context (when configured).
 
-5. **Hallucination Grading** — A second Pydantic-structured LLM call verifies the answer is grounded in the provided context. If hallucinated, the generation is retried.
+5. **Generation** — The LLM generates a response grounded in the filtered context.
+
+6. **Hallucination Grading** — A second Pydantic-structured LLM call verifies the answer is grounded in the provided context. If hallucinated, the generation is retried.
 
 ## Resume-Ready Highlights
 
@@ -180,7 +207,7 @@ All sources merge automatically into the same vector store.
 | **Pydantic Structured Outputs** | Production reliability, type-safe grading pipelines |
 | **Self-Corrective Loops** | Fault-tolerant agentic systems, error recovery |
 | **Web Search Fallback** | Graceful degradation, external tool integration |
-| **FastAPI + SSE Streaming** | Production API design, real-time observability |
+| **Streamlit UI** | User-facing product, interactive data application |
 | **LangGraph State Machine** | Complex workflow orchestration, cyclical graphs |
 
 ## License
