@@ -9,16 +9,37 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-try:
-    from langchain.retrievers import EnsembleRetriever
-except ImportError:
-    from langchain_community.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from langchain_groq import ChatGroq
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
 warnings.filterwarnings("ignore")
+
+
+# --------------- Lightweight EnsembleRetriever (replaces langchain.retrievers) ---------------
+class EnsembleRetriever:
+    """Combine multiple retrievers using Reciprocal Rank Fusion."""
+
+    def __init__(self, retrievers, weights=None):
+        self.retrievers = retrievers
+        self.weights = weights or [1.0 / len(retrievers)] * len(retrievers)
+
+    def invoke(self, query, **kwargs):
+        from collections import defaultdict
+        scores = defaultdict(float)
+        doc_map = {}
+        for retriever, weight in zip(self.retrievers, self.weights):
+            try:
+                docs = retriever.invoke(query, **kwargs)
+            except Exception:
+                docs = retriever.invoke(query)
+            for rank, doc in enumerate(docs):
+                key = doc.page_content[:200]
+                scores[key] += weight / (rank + 60)
+                doc_map[key] = doc
+        ranked = sorted(scores.keys(), key=lambda k: scores[k], reverse=True)
+        return [doc_map[k] for k in ranked]
 
 # --------------- Config ---------------
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
