@@ -14,7 +14,6 @@ from graphrag import (
     CHUNK_OVERLAP,
     RETRIEVAL_K,
     GraphRAG,
-    load_documents,
 )
 
 
@@ -147,6 +146,8 @@ with st.sidebar:
                 saved += 1
             st.cache_resource.clear()
         st.success(f"Saved {saved} file(s)")
+        if "engine" in st.session_state:
+            del st.session_state.engine
         time.sleep(0.5)
         st.rerun()
 
@@ -159,6 +160,8 @@ with st.sidebar:
                         os.remove(os.path.join(d, f))
                         count += 1
         st.cache_resource.clear()
+        if "engine" in st.session_state:
+            del st.session_state.engine
         if count:
             st.toast(f"Cleared {count} file(s)")
             time.sleep(0.3)
@@ -199,9 +202,31 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
-# --- Main Content ---
-raw_docs = load_documents()
-if not raw_docs:
+# --- Engine (cached in session, rebuilt only when docs change) ---
+has_docs = total > 0
+
+if has_docs:
+    # Cache the engine in session_state — only rebuilds when cleared
+    if "engine" not in st.session_state or st.session_state.get("_doc_count") != total:
+        with st.spinner("Building knowledge base..."):
+            st.session_state.engine = GraphRAG()
+            st.session_state._doc_count = total
+    engine = st.session_state.engine
+
+    st.markdown(
+        f"""
+        <div class="pipeline-status">
+            <span class="pipeline-step done">:white_check_mark: {engine.page_count} pages loaded</span>
+            <span class="pipeline-arrow">-></span>
+            <span class="pipeline-step done">:white_check_mark: {engine.chunk_count} chunks indexed</span>
+            <span class="pipeline-arrow">-></span>
+            <span class="pipeline-step done">:white_check_mark: Ready</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+else:
+    # Welcome screen
     st.markdown(
         """
         <div class="welcome-card">
@@ -242,32 +267,7 @@ if not raw_docs:
     ]:
         st.markdown(f'<div class="example-card">:bulb: {ex}</div>', unsafe_allow_html=True)
 
-    st.stop()
-
-# Build engine (cached across reruns via st.cache_resource)
-@st.cache_resource
-def _build_engine():
-    return GraphRAG()
-
-with st.spinner("Building knowledge base..."):
-    engine = _build_engine()
-
-st.markdown(
-    f"""
-    <div class="pipeline-status">
-        <span class="pipeline-step done">:white_check_mark: {engine.page_count} pages loaded</span>
-        <span class="pipeline-arrow">-></span>
-        <span class="pipeline-step done">:white_check_mark: {engine.chunk_count} chunks indexed</span>
-        <span class="pipeline-arrow">-></span>
-        <span class="pipeline-step done">:white_check_mark: Hybrid retriever ready</span>
-        <span class="pipeline-arrow">-></span>
-        <span class="pipeline-step done">:white_check_mark: Graph compiled</span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-# --- Chat ---
+# --- Chat (always renders, even without docs) ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -289,6 +289,10 @@ for msg in st.session_state.messages:
 
 query = st.chat_input("Ask a question about your documents...")
 if query:
+    if not has_docs:
+        st.warning("Upload and save documents first, then ask questions.")
+        st.stop()
+
     st.session_state.messages.append({"role": "user", "content": query})
     with st.chat_message("user", avatar=":bust_in_silhouette:"):
         st.markdown(query)
