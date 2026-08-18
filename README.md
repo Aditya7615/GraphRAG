@@ -21,6 +21,7 @@ Upload Documents → Ask Questions → Get Grounded Answers
 | **Web Search Fallback** | Tavily integration triggers when local retrieval finds no relevant documents |
 | **Local Embeddings** | HuggingFace BGE-small model — no API key needed for embeddings |
 | **Document Ingestion** | PDF, TXT, and Markdown support with drag-and-drop upload |
+| **RAGAS Evaluation** | Built-in evaluation metrics for RAG pipeline quality assessment |
 
 ## Architecture
 
@@ -73,6 +74,7 @@ User Query
 | **Keyword Search** | [BM25](https://github.com/dorianbrown/rank_bm25) — sparse lexical retrieval |
 | **Structured Outputs** | [Pydantic](https://docs.pydantic.dev/) — type-safe LLM grading |
 | **Web Search** | [Tavily](https://tavily.com/) — fallback when local retrieval fails |
+| **Evaluation** | [RAGAS](https://docs.ragas.io/) — RAG pipeline quality assessment |
 | **UI** | [Streamlit](https://streamlit.io/) — interactive web interface |
 
 ## Quick Start
@@ -132,7 +134,10 @@ Run cells top-to-bottom for the full pipeline with test queries.
 ```
 GraphRAG/
 ├── streamlit_app.py         # Streamlit UI — main entry point
+├── graphrag.py              # Core RAG pipeline
+├── evaluate.py              # RAGAS evaluation module
 ├── GraphRAG.ipynb           # Jupyter notebook — full pipeline
+├── evaluation.ipynb         # Jupyter notebook — RAGAS evaluation
 ├── requirements.txt         # Python dependencies
 ├── .env.example             # Environment variable template
 ├── .env                     # Your API keys (git-ignored)
@@ -219,6 +224,74 @@ All sources merge automatically into the same vector store.
 | **Web Search Fallback** | Graceful degradation, external tool integration |
 | **Streamlit UI** | User-facing product, interactive data application |
 | **LangGraph State Machine** | Complex workflow orchestration, cyclical graphs |
+
+## RAGAS Evaluation
+
+The GraphRAG pipeline includes built-in evaluation using [RAGAS](https://docs.ragas.io/) (Retrieval Augmented Generation Assessment) metrics.
+
+### Metrics
+
+| Metric | Description |
+|--------|-------------|
+| **Faithfulness** | How grounded the answer is in the provided context |
+| **Answer Relevancy** | How relevant the answer is to the user's question |
+| **Context Precision** | How precise the retrieved contexts are |
+| **Context Recall** | How well the contexts recall relevant information |
+
+### Usage
+
+#### Via Streamlit UI
+
+1. Run the Streamlit app: `streamlit run streamlit_app.py`
+2. Scroll down to the **RAGAS Evaluation** section
+3. Enter evaluation questions (one per line)
+4. Optionally enter ground truth answers
+5. Click **Run Evaluation**
+
+#### Via Python
+
+```python
+from graphrag import GraphRAG
+from evaluate import RAGASEvaluator
+
+engine = GraphRAG()
+evaluator = RAGASEvaluator(engine)
+
+questions = [
+    "What is GraphRAG?",
+    "How does hybrid retrieval work?",
+]
+
+result = evaluator.evaluate(questions)
+
+print(f"Faithfulness: {result.faithfulness:.2%}")
+print(f"Answer Relevancy: {result.answer_relevancy:.2%}")
+print(f"Context Precision: {result.context_precision:.2%}")
+print(f"Context Recall: {result.context_recall:.2%}")
+print(f"Overall Score: {result.overall_score:.2%}")
+```
+
+#### Via Notebook
+
+Run `evaluation.ipynb` for a step-by-step walkthrough with visualization:
+
+```bash
+jupyter notebook evaluation.ipynb
+```
+
+### Configuration
+
+The evaluation uses:
+- **LLM**: Groq (same as main pipeline) via `LangchainLLMWrapper`
+- **Embeddings**: HuggingFace BGE-small (`BAAI/bge-small-en-v1.5`) — no API key needed
+- **Timeout**: 300s with 5 retries, 4 concurrent workers (avoids Groq rate limits)
+
+To adjust timeout settings, modify `RunConfig` in `evaluate.py`:
+
+```python
+from ragas.run_config import RunConfig
+run_config = RunConfig(timeout=300, max_retries=5, max_workers=4)
+```
 
 ## License
 
