@@ -29,7 +29,6 @@ Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
 
 # Testing / Linting
 .pytest_cache/
@@ -37,20 +36,13 @@ npm-debug.log*
 .coverage
 htmlcov/
 
-# Data (generated at runtime — do not commit)
-data/synthetic/
-data/uploads/
-data/docstore/parents.json
-data/docstore/bm25_stats.json
-data/large/
-
-# Qdrant / Postgres volumes (managed by Docker)
-qdrant_storage/
-postgres_data/
-
 # Jupyter
 .ipynb_checkpoints/
-1st.ipynb
 
-# Reports
-*.pptx
+# User uploads and generated data
+data/pdfs/*
+data/texts/*
+data/chroma_db/*
+!data/pdfs/.gitkeep
+!data/texts/.gitkeep
+!data/chroma_db/.gitkeep
