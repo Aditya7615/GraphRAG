@@ -14,7 +14,15 @@ from graphrag import (
     CHUNK_OVERLAP,
     RETRIEVAL_K,
     GraphRAG,
+    load_dotenv,
 )
+
+# Load .env for local dev; Streamlit Cloud uses secrets manager
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+# On Streamlit Cloud, inject secrets into os.environ so graphrag can read them
+if "GROQ_API_KEY" not in os.environ and hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 
 
 # --------------- Custom CSS ---------------
@@ -208,9 +216,25 @@ has_docs = total > 0
 if has_docs:
     # Cache the engine in session_state — only rebuilds when cleared
     if "engine" not in st.session_state or st.session_state.get("_doc_count") != total:
+        if not os.environ.get("GROQ_API_KEY"):
+            st.error(
+                "**GROQ_API_KEY is missing.** "
+                "Add it to `.env` (local) or Streamlit secrets (cloud)."
+            )
+            st.stop()
         with st.spinner("Building knowledge base..."):
-            st.session_state.engine = GraphRAG()
-            st.session_state._doc_count = total
+            status = st.empty()
+            try:
+                status.info("Loading documents (first run parses PDFs, cached after)...")
+                import graphrag as _gr
+                _gr.load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+                status.info("Building embeddings & vector store...")
+                st.session_state.engine = GraphRAG()
+                st.session_state._doc_count = total
+                status.empty()
+            except Exception as e:
+                status.error(f"Failed to build knowledge base: {e}")
+                st.stop()
     engine = st.session_state.engine
 
     st.markdown(
@@ -272,8 +296,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for msg in st.session_state.messages:
-    avatar = ":bust_in_silhouette:" if msg["role"] == "user" else ":robot_face:"
-    with st.chat_message(msg["role"], avatar=avatar):
+    with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg.get("sources"):
             with st.expander(f":link: {len(msg['sources'])} source(s)"):
@@ -294,10 +317,10 @@ if query:
         st.stop()
 
     st.session_state.messages.append({"role": "user", "content": query})
-    with st.chat_message("user", avatar=":bust_in_silhouette:"):
+    with st.chat_message("user"):
         st.markdown(query)
 
-    with st.chat_message("assistant", avatar=":robot_face:"):
+    with st.chat_message("assistant"):
         status_placeholder = st.empty()
         status_placeholder.markdown(
             '<div class="pipeline-status">'

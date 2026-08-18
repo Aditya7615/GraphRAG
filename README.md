@@ -104,10 +104,20 @@ Optional:
 streamlit run streamlit_app.py
 ```
 
-Opens at **http://localhost:8501** with:
+Opens at **http://localhost:8502** with:
 - Drag-and-drop document upload (PDF, TXT, MD)
 - Chat interface with real-time pipeline status
 - Source attribution with expandable document snippets
+
+### 4. Deploy to Streamlit Cloud
+
+1. Push to GitHub
+2. Go to [share.streamlit.io](https://share.streamlit.io)
+3. Connect your repo and select `streamlit_app.py`
+4. Add secret in **Manage app → Secrets**:
+   ```toml
+   GROQ_API_KEY = "your_key_here"
+   ```
 
 ### 4. (Alternative) Run the Notebook
 

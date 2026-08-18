@@ -98,11 +98,42 @@ def get_embeddings():
 
 
 def get_llm():
-    return ChatGroq(model="qwen/qwen3.6-27b", temperature=0)
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "GROQ_API_KEY is not set. Add it to .env (local) or Streamlit secrets (cloud)."
+        )
+    return ChatGroq(model="qwen/qwen3.6-27b", temperature=0, groq_api_key=api_key)
 
 
 def load_documents():
-    """Load all saved PDFs and text files from data/."""
+    """Load all saved PDFs and text files from data/, with caching."""
+    import hashlib
+    import pickle
+
+    cache_path = os.path.join(DATA_DIR, "docs_cache.pkl")
+
+    # Build a hash of all source files to detect changes
+    file_hash = hashlib.md5()
+    for d in [PDF_DIR, TEXT_DIR]:
+        if os.path.isdir(d):
+            for f in sorted(os.listdir(d)):
+                if f != ".gitkeep":
+                    fp = os.path.join(d, f)
+                    file_hash.update(f.encode())
+                    file_hash.update(str(os.path.getmtime(fp)).encode())
+    file_hash = file_hash.hexdigest()
+
+    # Return cached docs if hash matches
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "rb") as f:
+                cached = pickle.load(f)
+            if cached.get("hash") == file_hash and cached.get("docs"):
+                return cached["docs"]
+        except Exception:
+            pass
+
     docs = []
     if os.path.isdir(PDF_DIR):
         from langchain_community.document_loaders import PyPDFLoader
@@ -123,6 +154,14 @@ def load_documents():
                 )
             except Exception:
                 pass
+
+    # Save cache
+    try:
+        with open(cache_path, "wb") as f:
+            pickle.dump({"hash": file_hash, "docs": docs}, f)
+    except Exception:
+        pass
+
     return docs
 
 
@@ -138,7 +177,8 @@ def build_retrievers(raw_docs):
         return None, []
 
     embeddings = get_embeddings()
-    vectorstore = Chroma.from_documents(chunks, embedding=embeddings)
+    chroma_dir = os.path.join(DATA_DIR, "chroma_db")
+    vectorstore = Chroma.from_documents(chunks, embedding=embeddings, persist_directory=chroma_dir)
     chroma_ret = vectorstore.as_retriever(search_kwargs={"k": RETRIEVAL_K})
 
     bm25_ret = BM25Retriever.from_documents(chunks)

@@ -15,6 +15,7 @@ ENV/
 # Environment
 .env
 .env.local
+.streamlit/secrets.toml
 
 # IDE
 .vscode/
@@ -46,6 +47,6 @@ api_server.py
 data/pdfs/*
 data/texts/*
 data/chroma_db/*
+data/docs_cache.pkl
 !data/pdfs/.gitkeep
 !data/texts/.gitkeep
-!data/chroma_db/.gitkeep
